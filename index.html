@@ -1,86 +1,220 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dark Smoke</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DeFi Wallet Connect Demo</title>
+
+<!-- Ethers (for MetaMask / EVM) -->
+<script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.min.js"></script>
+<!-- Solana web3 (for Phantom) -->
+<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+
 <style>
-  html, body {
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    background-color: #000;
-  }
-
-  body {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-family: "Segoe UI", sans-serif;
-    color: white;
-    text-align: center;
-  }
-
-  /* Layered moving smoke effect */
+  /* --- smoke background (from previous design) --- */
+  html,body{height:100%;margin:0;overflow:hidden;background:#000}
+  body{font-family:Segoe UI,Arial,sans-serif;color:#fff;display:flex;align-items:center;justify-content:center}
   .smoke-bg, .smoke-layer {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 200%;
-    height: 200%;
-    background-repeat: repeat;
-    opacity: 0.4;
-    filter: blur(30px);
-    animation: moveSmoke 60s linear infinite;
+    position: fixed; inset: -25% -25% -25% -25%;
+    width:150%; height:150%;
+    filter: blur(30px) saturate(1.05);
+    pointer-events:none;
+    z-index:0;
   }
-
-  /* First smoke layer (gray + red tint) */
   .smoke-bg {
-    background: radial-gradient(circle at top left, rgba(120, 0, 0, 0.5), transparent 40%),
-                radial-gradient(circle at bottom left, rgba(200, 200, 200, 0.25), transparent 70%),
-                radial-gradient(circle at top right, rgba(80, 80, 80, 0.35), transparent 70%),
-                #000;
-    background-blend-mode: screen;
-    animation-duration: 80s;
+    background:
+      radial-gradient(circle at top left, rgba(150,0,0,0.45), transparent 30%),
+      radial-gradient(circle at bottom left, rgba(220,220,220,0.35), transparent 50%),
+      radial-gradient(circle at top right, rgba(80,80,80,0.45), transparent 60%),
+      #000;
+    mix-blend-mode: screen;
+    animation: move1 80s linear infinite;
+    opacity:0.9;
   }
-
-  /* Second smoke layer (lighter gray, moves differently) */
   .smoke-layer {
-    background: radial-gradient(circle at bottom right, rgba(220, 220, 220, 0.25), transparent 60%),
-                radial-gradient(circle at top left, rgba(255, 0, 0, 0.25), transparent 70%),
-                #000;
+    background:
+      radial-gradient(circle at bottom right, rgba(230,230,230,0.22), transparent 40%),
+      radial-gradient(circle at left center, rgba(255, 40, 40, 0.18), transparent 55%),
+      #000;
     mix-blend-mode: lighten;
-    animation-duration: 100s;
-    animation-direction: reverse;
+    animation: move2 110s linear infinite reverse;
+    opacity:0.7;
   }
+  @keyframes move1 { 0%{transform:translate(0,0) scale(1)}50%{transform:translate(-15%, -10%) scale(1.08)}100%{transform:translate(0,-25%) scale(1.12)} }
+  @keyframes move2 { 0%{transform:translate(0,0) scale(1)}50%{transform:translate(10%,-5%) scale(1.04)}100%{transform:translate(0,-30%) scale(1.08)} }
 
-  /* Movement animation */
-  @keyframes moveSmoke {
-    0% {
-      transform: translate(0, 0) scale(1);
-    }
-    50% {
-      transform: translate(-25%, -25%) scale(1.1);
-    }
-    100% {
-      transform: translate(0, -50%) scale(1.2);
-    }
-  }
-
-  h1 {
-    z-index: 10;
+  /* --- UI card --- */
+  .card {
     position: relative;
-    font-size: 3em;
-    text-shadow: 0 0 25px rgba(255, 0, 0, 0.6),
-                 0 0 50px rgba(255, 60, 60, 0.3);
+    z-index: 10;
+    width: 920px;
+    max-width: 94%;
+    background: rgba(10,10,10,0.55);
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(6px) saturate(1.1);
+    border-radius: 14px;
+    padding: 28px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.6);
   }
+  h2 { margin:0 0 12px 0; font-size:22px; letter-spacing:0.2px; color:#ffdddd; text-shadow:0 0 18px rgba(255,60,60,0.12);}
+  p.lead { margin:0 0 18px 0; color:#ddd; opacity:0.9; }
+
+  .row { display:flex; gap:16px; flex-wrap:wrap; }
+  .wallet {
+    flex:1 1 290px;
+    min-width:260px;
+    background: rgba(255,255,255,0.03);
+    border-radius:10px;
+    padding:16px;
+  }
+  .wallet h3 { margin:0 0 8px 0; font-size:16px; color:#fff; }
+  .btn {
+    display:inline-block;
+    padding:10px 14px;
+    border-radius:8px;
+    border:none;
+    cursor:pointer;
+    font-weight:600;
+    background: linear-gradient(90deg,#ff5a5a,#ff2a2a);
+    color:#fff;
+    box-shadow: 0 6px 18px rgba(255,30,30,0.12);
+  }
+  .btn.gray { background: linear-gradient(90deg,#6f6f6f,#4b4b4b); box-shadow:none; }
+  .info { margin-top:12px; font-family:monospace; font-size:13px; color:#eaeaea; word-break:break-all; }
+  .small { font-size:12px; color:#bbb; margin-top:8px; }
+
+  .status { margin-top:10px; padding:8px 10px; border-radius:8px; background:rgba(255,255,255,0.02); color:#f4f4f4; font-size:13px; }
+  .connected { color:#baffbf; }
+  .error { color:#ffb2b2; }
+
+  footer { margin-top:14px; font-size:12px; color:#aaa; text-align:right; }
 </style>
 </head>
 <body>
+
   <div class="smoke-bg"></div>
   <div class="smoke-layer"></div>
-  <h1>Dark Smoke</h1>
+
+  <div class="card">
+    <h2>Multi-Wallet Connect • MetaMask • Phantom • Abstract</h2>
+    <p class="lead">Connect your wallet, show address and simple balance. Works from static hosting (GitHub Pages).</p>
+
+    <div class="row">
+      <!-- MetaMask / EVM -->
+      <div class="wallet">
+        <h3>MetaMask / EVM</h3>
+        <button class="btn" id="mm-connect">Connect MetaMask</button>
+        <div id="mm-status" class="status">Not connected</div>
+        <div id="mm-info" class="info"></div>
+        <div class="small">Network: <span id="mm-network">—</span></div>
+      </div>
+
+      <!-- Phantom / Solana -->
+      <div class="wallet">
+        <h3>Phantom / Solana</h3>
+        <button class="btn" id="ph-connect">Connect Phantom</button>
+        <div id="ph-status" class="status">Not connected</div>
+        <div id="ph-info" class="info"></div>
+        <div class="small">Cluster: <span id="ph-cluster">mainnet</span></div>
+      </div>
+
+      <!-- Abstract (placeholder + link to integration) -->
+      <div class="wallet">
+        <h3>Abstract Global Wallet (AGW)</h3>
+        <button class="btn gray" id="abs-open">Open Abstract Portal</button>
+        <div id="abs-status" class="status">Use Abstract SDK (React) for full integration. <a href="#" id="abs-docs" style="color:#ffd1d1">Docs</a></div>
+        <div style="margin-top:10px; font-size:13px; color:#ccc">Note: full AGW integration typically uses Abstract's SDK (agw-react / agw-client).</div>
+      </div>
+    </div>
+
+    <footer>Make sure MetaMask / Phantom extension is installed in your browser.</footer>
+  </div>
+
+<script>
+/* ---------------- MetaMask (EVM) ---------------- */
+const mmConnectBtn = document.getElementById('mm-connect');
+const mmStatus = document.getElementById('mm-status');
+const mmInfo = document.getElementById('mm-info');
+const mmNetwork = document.getElementById('mm-network');
+
+async function connectMetaMask(){
+  try {
+    if (!window.ethereum){
+      mmStatus.textContent = 'MetaMask not found in browser.';
+      mmStatus.className = 'status error';
+      return;
+    }
+    // request accounts
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const address = accounts[0];
+    mmStatus.innerHTML = '<span class="connected">Connected</span>';
+    mmInfo.textContent = address;
+
+    // ethers provider for network + balance
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const network = await provider.getNetwork();
+    mmNetwork.textContent = network.name + ' (' + network.chainId + ')';
+    const balance = await provider.getBalance(address);
+    const eth = ethers.utils.formatEther(balance);
+    mmInfo.innerHTML = address + '\\nBalance: ' + parseFloat(eth).toFixed(4) + ' ETH';
+    // listen for account / network changes
+    window.ethereum.on && window.ethereum.on('accountsChanged', (accs)=> {
+      if(accs.length===0){ mmStatus.textContent='Not connected'; mmInfo.textContent=''; }
+      else { mmInfo.textContent = accs[0]; }
+    });
+    window.ethereum.on && window.ethereum.on('chainChanged', ()=> location.reload());
+  } catch (err){
+    mmStatus.className = 'status error';
+    mmStatus.textContent = 'Error: ' + (err.message || err);
+  }
+}
+mmConnectBtn.addEventListener('click', connectMetaMask);
+
+/* ---------------- Phantom (Solana) ---------------- */
+const phConnectBtn = document.getElementById('ph-connect');
+const phStatus = document.getElementById('ph-status');
+const phInfo = document.getElementById('ph-info');
+
+async function connectPhantom(){
+  try {
+    const provider = window.solana && window.solana.isPhantom ? window.solana : null;
+    if (!provider){
+      phStatus.className = 'status error';
+      phStatus.textContent = 'Phantom wallet not found.';
+      return;
+    }
+    // connect
+    const resp = await provider.connect();
+    const pubkey = resp.publicKey.toString();
+    phStatus.innerHTML = '<span class="connected">Connected</span>';
+    phInfo.textContent = pubkey;
+
+    // get SOL balance (via solana web3)
+    const conn = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
+    const balanceLamports = await conn.getBalance(new solanaWeb3.PublicKey(pubkey));
+    const sol = balanceLamports / solanaWeb3.LAMPORTS_PER_SOL;
+    phInfo.innerHTML = pubkey + '\\nBalance: ' + sol.toFixed(4) + ' SOL';
+
+    provider.on && provider.on('accountChanged', (key) => {
+      if(!key){ phStatus.textContent='Not connected'; phInfo.textContent=''; }
+      else { phInfo.textContent = key.toString(); }
+    });
+  } catch (err){
+    phStatus.className = 'status error';
+    phStatus.textContent = 'Error: ' + (err.message || err);
+  }
+}
+phConnectBtn.addEventListener('click', connectPhantom);
+
+/* ---------------- Abstract Portal (placeholder) ---------------- */
+document.getElementById('abs-open').addEventListener('click', ()=>{
+  // open Abstract Portal in new tab (user can sign-in there)
+  window.open('https://portal.abs.xyz/', '_blank');
+});
+document.getElementById('abs-docs').setAttribute('href','https://docs.abs.xyz/abstract-global-wallet/overview');
+</script>
 </body>
 </html>
+
 
 
