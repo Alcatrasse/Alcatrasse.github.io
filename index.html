@@ -6,23 +6,38 @@
   <title>مرحباً بكم في موقعي</title>
   <style>
     body {
-      background: linear-gradient(to bottom right, #4A90E2, #85C1E9);
+      /* خلفية متدرجة عصرية */
+      background: linear-gradient(135deg, #a1c4fd, #c2e9fb, #89f7fe, #66a6ff, #6a11cb, #2575fc);
+      background-size: 400% 400%;
+      animation: gradientMove 15s ease infinite;
+
       color: white;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
       text-align: center;
       padding: 100px 20px;
     }
+
+    /* حركة لطيفة للتدرج */
+    @keyframes gradientMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
     h1 {
       font-size: 50px;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.4);
     }
+
     p {
       font-size: 22px;
+      text-shadow: 1px 1px 6px rgba(0, 0, 0, 0.3);
     }
   </style>
 </head>
 <body>
-  <h1>مرحباً بكم في موقعي 🌐</h1>
+  <h1>🌈 مرحباً بكم في موقعي العصري</h1>
   <p>تم تشغيل GitHub Pages بنجاح!</p>
+  <p>خلفية متدرجة تتحرك بألوان جميلة ✨</p>
 </body>
 </html>
-
